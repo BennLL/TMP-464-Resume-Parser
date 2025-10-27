@@ -1,25 +1,16 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import ResumeForm from "./components/resumeForm";
 
-function App() {
+export default function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <div className="max-w-3xl w-full bg-white rounded-2xl shadow p-8">
+        <h1 className="text-2xl font-bold mb-4">Resume Analyzer — Tailor for a Role</h1>
+        <p className="text-sm text-gray-600 mb-6">
+          Upload your resume (PDF or DOCX), enter the role & company, and get structured suggestions to tailor your resume.
         </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+        <ResumeForm />
+      </div>
     </div>
   );
 }
-
-export default App;
