@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { GlobalWorkerOptions, getDocument } from "pdfjs-dist/webpack";
 import mammoth from "mammoth";
+import AnalysisResult from "./analysisResult";
 
 GlobalWorkerOptions.workerSrc = ""; // Worker handled by CRA
 
@@ -130,7 +131,7 @@ export default function ResumeForm() {
           }}
         >
           <h3>Analysis Result:</h3>
-          {JSON.stringify(result, null, 2)}
+          {result && <AnalysisResult result={result} />}
         </div>
       )}
     </form>
