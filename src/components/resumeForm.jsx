@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { GlobalWorkerOptions, getDocument } from "pdfjs-dist/webpack"; // CRA-friendly PDF.js
+import { GlobalWorkerOptions, getDocument } from "pdfjs-dist/webpack";
 import mammoth from "mammoth";
 
-GlobalWorkerOptions.workerSrc = ""; // Worker bundled automatically
+GlobalWorkerOptions.workerSrc = ""; // Worker handled by CRA
 
 export default function ResumeForm() {
   const [file, setFile] = useState(null);
@@ -12,7 +12,7 @@ export default function ResumeForm() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
-  // Extract text from PDF
+  // Extract text from PDF file
   const extractTextFromPDF = async (file) => {
     const arrayBuffer = await file.arrayBuffer();
     const pdf = await getDocument({ data: arrayBuffer }).promise;
@@ -25,17 +25,19 @@ export default function ResumeForm() {
     return text;
   };
 
-  // Extract text from DOCX
+  // Extract text from DOCX file
   const extractTextFromDOCX = async (file) => {
     const arrayBuffer = await file.arrayBuffer();
     const { value } = await mammoth.extractRawText({ arrayBuffer });
     return value;
   };
 
+  // Handle resume file selection
   const handleFileChange = (e) => {
     setFile(e.target.files[0]);
   };
 
+  // Handle form submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -60,59 +62,26 @@ export default function ResumeForm() {
         throw new Error("Unsupported file type. Only PDF and DOCX are allowed.");
       }
 
-      const apiKey = process.env.REACT_APP_OPENAI_API_KEY;
-      const model = process.env.REACT_APP_OPENAI_MODEL || "gpt-4o";
-
-      const prompt = `
-User target role: ${role}
-Company: ${company}
-
-Resume text:
-"""${resumeText}"""
-
-Please analyze the resume for the target role and company, and return a single JSON object with these keys:
-- matchScore: integer 0-100
-- strengths: array of short strings
-- weaknesses: array of short strings
-- suggestions: array of short strings
-- tailoredBullets: array of short strings
-- notes: optional string
-Return ONLY valid JSON.
-`;
-
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      // ✅ Call backend API (not OpenAI directly anymore)
+      const response = await fetch("/api/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${apiKey}`,
         },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: "system", content: "You are a professional resume reviewer. Return only JSON." },
-            { role: "user", content: prompt },
-          ],
-          temperature: 0.15,
-          max_tokens: 1200,
-        }),
+        body: JSON.stringify({ resumeText: resumeText.trim(), role, company }),
       });
 
       if (!response.ok) {
         const text = await response.text();
-        throw new Error(`OpenAI error: ${text}`);
+        throw new Error(`Server error: ${text}`);
       }
 
       const data = await response.json();
-      const content = data.choices?.[0]?.message?.content;
+      setResult(data);
 
-      // Robustly strip markdown code fences before parsing
-      let cleaned = content.trim();
-      cleaned = cleaned.replace(/^```json\s*/, "").replace(/^```/, "").replace(/```$/, "").trim();
-
-      const parsed = JSON.parse(cleaned);
-      setResult(parsed);
     } catch (err) {
-      setError(err.message || "Unknown error");
+      console.error(err);
+      setError(err.message || "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -121,18 +90,26 @@ Return ONLY valid JSON.
   return (
     <form onSubmit={handleSubmit} style={{ marginTop: "1rem" }}>
       <div style={{ marginBottom: "0.5rem" }}>
-        <label>Upload Resume (PDF or DOCX):</label><br/>
+        <label>Upload Resume (PDF or DOCX):</label><br />
         <input type="file" accept=".pdf,.docx" onChange={handleFileChange} />
       </div>
 
       <div style={{ marginBottom: "0.5rem" }}>
-        <label>Target Role:</label><br/>
-        <input value={role} onChange={(e) => setRole(e.target.value)} style={{ width: "100%" }} />
+        <label>Target Role:</label><br />
+        <input
+          value={role}
+          onChange={(e) => setRole(e.target.value)}
+          style={{ width: "100%" }}
+        />
       </div>
 
       <div style={{ marginBottom: "0.5rem" }}>
-        <label>Company (optional):</label><br/>
-        <input value={company} onChange={(e) => setCompany(e.target.value)} style={{ width: "100%" }} />
+        <label>Company (optional):</label><br />
+        <input
+          value={company}
+          onChange={(e) => setCompany(e.target.value)}
+          style={{ width: "100%" }}
+        />
       </div>
 
       <button type="submit" disabled={loading}>
@@ -142,8 +119,17 @@ Return ONLY valid JSON.
       {error && <p style={{ color: "red" }}>{error}</p>}
 
       {result && (
-        <div style={{ marginTop: "1rem", whiteSpace: "pre-wrap", background: "#f4f4f4", padding: "1rem" }}>
-          <h3>Analysis (JSON):</h3>
+        <div
+          style={{
+            marginTop: "1rem",
+            whiteSpace: "pre-wrap",
+            background: "#f4f4f4",
+            padding: "1rem",
+            borderRadius: "4px",
+            fontSize: "14px",
+          }}
+        >
+          <h3>Analysis Result:</h3>
           {JSON.stringify(result, null, 2)}
         </div>
       )}
