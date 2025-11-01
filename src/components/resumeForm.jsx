@@ -92,7 +92,13 @@ export default function ResumeForm() {
     <form onSubmit={handleSubmit} style={{ marginTop: "1rem" }}>
       <div style={{ marginBottom: "0.5rem" }}>
         <label>Upload Resume (PDF or DOCX):</label><br />
-        <input type="file" accept=".pdf,.docx" onChange={handleFileChange} />
+        <input
+          type="file"
+          accept=".pdf,.docx"
+          onChange={handleFileChange}
+          className="rounded-xl file:rounded-xl file:cursor-pointer"
+        />
+
       </div>
 
       <div style={{ marginBottom: "0.5rem" }}>
@@ -100,7 +106,7 @@ export default function ResumeForm() {
         <input
           value={role}
           onChange={(e) => setRole(e.target.value)}
-          style={{ width: "100%" }}
+          className="w-1/2 text-black rounded-lg"
         />
       </div>
 
@@ -109,27 +115,18 @@ export default function ResumeForm() {
         <input
           value={company}
           onChange={(e) => setCompany(e.target.value)}
-          style={{ width: "100%" }}
+          className="w-1/2 text-black rounded-lg"
         />
       </div>
 
-      <button type="submit" disabled={loading}>
+      <button className="mt-1 px-6 py-2 rounded-lg border border-gray-300 rounded-lg hover:text-black hover:bg-white" type="submit" disabled={loading}>
         {loading ? "Analyzing..." : "Analyze Resume"}
       </button>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
+      {error && <p className="text-red-600">{error}</p>}
 
       {result && (
-        <div
-          style={{
-            marginTop: "1rem",
-            whiteSpace: "pre-wrap",
-            background: "#f4f4f4",
-            padding: "1rem",
-            borderRadius: "4px",
-            fontSize: "14px",
-          }}
-        >
+        <div>
           <h3>Analysis Result:</h3>
           {result && <AnalysisResult result={result} />}
         </div>
