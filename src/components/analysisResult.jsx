@@ -12,51 +12,40 @@ export default function AnalysisResult({ result }) {
     notes = "",
   } = result;
 
+  // Helper to render a card with a scrollable list
+  const renderCard = (title, items) => (
+    <div className="text-white shadow-md rounded-lg p-4 mb-4 flex flex-col">
+      <h4 className="font-semibold mb-2">{title}</h4>
+      <div className="overflow-y-auto max-h-40 pr-2">
+        <ul className="list-disc pl-5 space-y-1">
+          {items.map((item, i) => (
+            <li key={i}>{item}</li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+
   return (
-    <div
-      style={{
-        marginTop: "1rem",
-        background: "#f4f4f4",
-        padding: "1rem",
-        borderRadius: "6px",
-      }}
-    >
-      <h3>Resume Analysis</h3>
-      <p><strong>Match Score:</strong> {matchScore}/100</p>
+    <div className="mt-4 space-y-4">
+      {/* Match Score */}
+      <div className="text-white shadow-md rounded-lg p-4 flex items-center justify-between">
+        <span className="font-semibold text-lg">Match Score:</span>
+        <span className="text-xl font-bold">{matchScore}/100</span>
+      </div>
 
-      {strengths.length > 0 && (
-        <>
-          <h4>Strengths:</h4>
-          <ul>{strengths.map((s, i) => <li key={i}>{s}</li>)}</ul>
-        </>
-      )}
+      {/* Sections */}
+      {strengths.length > 0 && renderCard("Strengths", strengths)}
+      {weaknesses.length > 0 && renderCard("Weaknesses", weaknesses)}
+      {suggestions.length > 0 && renderCard("Suggestions", suggestions)}
+      {tailoredBullets.length > 0 && renderCard("Tailored Bullets", tailoredBullets)}
 
-      {weaknesses.length > 0 && (
-        <>
-          <h4>Weaknesses:</h4>
-          <ul>{weaknesses.map((w, i) => <li key={i}>{w}</li>)}</ul>
-        </>
-      )}
-
-      {suggestions.length > 0 && (
-        <>
-          <h4>Suggestions:</h4>
-          <ul>{suggestions.map((s, i) => <li key={i}>{s}</li>)}</ul>
-        </>
-      )}
-
-      {tailoredBullets.length > 0 && (
-        <>
-          <h4>Tailored Bullets:</h4>
-          <ul>{tailoredBullets.map((b, i) => <li key={i}>{b}</li>)}</ul>
-        </>
-      )}
-
+      {/* Notes */}
       {notes && (
-        <>
-          <h4>Notes:</h4>
+        <div className="text-white shadow-md rounded-lg p-4">
+          <h4 className="font-semibold mb-2">Notes:</h4>
           <p>{notes}</p>
-        </>
+        </div>
       )}
     </div>
   );
