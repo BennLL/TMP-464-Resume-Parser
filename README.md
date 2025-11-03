@@ -16,7 +16,6 @@ CV Bro is a web application that analyzes your resume and provides structured fe
   - `tailoredBullets` (array)
   - `notes` (optional)
 - Clean UI built with **React** and **Tailwind CSS**.
-- Scrollable cards for all analysis sections.
 - Backend proxy to OpenAI API for secure key handling.
 
 
